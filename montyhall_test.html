@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="fr">
+    <head>
+        <meta charset="utf-8">
+        <title>Test Monty Hall</title>
+        <style>
+            body {
+                font-family: Arial;
+            }
+            table {
+                text-align: center;
+                
+            }
+            .w {
+                background-color: lightgreen;
+            }
+            td {
+                background-color: beige;
+                padding: 10px;
+            }
+            th {
+                background-color: bisque;
+                padding: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Monty Hall Problem</h1>
+        <a href="https://en.wikipedia.org/wiki/Monty_Hall_problem">Problem description</a>
+        <br/>
+        <br/>
+        <div id="result"></div>
+        <br/>
+        <button type="button" onclick="runAgain()">Run again</button>
+        <div id="data"></div>
+        <script>
+            // return a random integer between 0 and 2
+            var randomFromThree = function() {
+                return (Math.random() * 3)|0;
+            }
+
+            // initialize the doors array with Goats and Car
+            var initDoors = function(doors) {
+                doors[0] = doors[1] = doors[2] = "G";
+                var carDoor = randomFromThree();
+                doors[carDoor] = "C";
+            };
+
+            var playAndChange = function(round, doors) {
+                // reset the doors
+                initDoors(doors);
+
+                // attendee choices one door
+                var attendeeChoice = randomFromThree();
+
+                // Monty Hall reveals a goat behing another door
+                var i = 0;
+                while (doors[i] == "C" || i == attendeeChoice) {
+                    i++;
+                }
+                var revealedDoor = i;       
+                var closedDoor = 3 - (attendeeChoice + revealedDoor);
+                logData(round, doors, attendeeChoice, revealedDoor, closedDoor, table);
+                if (doors[closedDoor] == "C") {
+                    return true;
+                }
+                return false;
+            }
+
+            var logData = function(round, doors, attendeeChoice, revealedDoor, closedDoor, table) {
+                var label = table.labels;
+                var classW = " class='w'";
+                var ca = (doors[attendeeChoice] == "C") ? classW : "";
+                var co = (doors[closedDoor] == "C") ? classW : "";
+                var span = "<span class='w'>";
+                var es = "</span>";
+                var d0 = (doors[0] == "C") ? span : "";
+                var d1 = (doors[1] == "C") ? span : "";
+                var d2 = (doors[2] == "C") ? span : "";
+
+                var row = "<tr><td>" + round + "</td><td>" + d0 + label[doors[0]] + es + " " + d1 + label[doors[1]] + es + " " + d2 + label[doors[2]] + es + "</td><td" + ca + ">" + doorLetters[attendeeChoice] + "</td><td>" + doorLetters[revealedDoor] + "</td><td" + co + ">" + doorLetters[closedDoor] + "</td></tr>";
+                table.text = table.text + row;
+            };
+
+            // play roundNumber rounds and display the result
+            var run = function(roundNumber) {
+                var tableText = "<table><tr><th></th><th>Doors</th><th></th><th></th><th></th></tr>";
+                tableText = tableText + "<tr><th>round</th><th>A" + spaces + "B" + spaces + "C</th><th>Attendee's choice</th><th>Revealed door</th><th>Other door</th></tr>";
+                table.text = tableText;
+
+                var score = 0;
+                for (var r = 0; r < roundNumber; r++) {
+                    if ( playAndChange(r + 1, doors) ) {
+                        score++;
+                    }
+                }
+                var successRatio = score / roundNumber * 100.0;
+                var resultText = "Rounds : " + roundNumber +"<br/>"
+                resultText = resultText + "Success percentage by changing the initial attendee's choice : <b>" + successRatio.toFixed(2) + " %</b>";
+                divResult.innerHTML = resultText;
+                table.text = table.text + "</table>";
+                divData.innerHTML = table.text;
+            };
+
+            // main program
+            var roundNumber = 3000;
+
+            var doors = [];
+            var doorLetters = ["A", "B", "C"];
+            var divResult = document.querySelector("#result");
+            var divData = document.querySelector("#data");
+            var spaces = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+            var labels = {G: "GOAT", C: "CAR&nbsp;"};
+            var table = {text: "", labels: labels};
+            var runAgain = function() { run(roundNumber); };
+            
+            run(roundNumber);
+
+        </script>
+    </body>
+</html>
